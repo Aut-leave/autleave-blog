@@ -1,0 +1,43 @@
+# 站点基础配置：改完这里，全站生效
+baseURL: "https://autleave.top/"       # 你的域名；结尾的斜杠不能少
+title: "我的博客"                     # ← 站点名
+defaultContentLanguage: "zh-cn"
+hasCJKLanguage: true
+enableRobotsTXT: true
+summaryLength: 90                   # 中文摘要按字数算，90 字大概两三行
+
+pagination:
+  pagerSize: 10
+
+params:
+  author: "你的名字"
+  description: "记录想法、笔记和生活。"
+
+  # ===== 评论（Giscus，基于 GitHub Discussions，免费）=====
+  # 四项都填好才会自动出现评论区，留空则完全不加载
+  # 获取方式见《部署指南.md》第 8 节
+  giscus:
+    repo: ""              # 例：yourname/blog-comments
+    repoId: ""
+    category: "Announcements"
+    categoryId: ""
+    mapping: "pathname"
+    theme: "preferred_color_scheme"
+    lang: "zh-CN"
+
+menu:
+  main:
+    - name: "文章"
+      url: "/posts/"
+      weight: 10
+    - name: "关于"
+      url: "/about/"
+      weight: 20
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true        # 允许正文里写原始 HTML
+  highlight:
+    style: "github"
+    noClasses: true

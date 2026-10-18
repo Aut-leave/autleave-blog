@@ -1,0 +1,23 @@
+{{ define "main" }}
+<section class="intro">
+  <h1>{{ site.Title }}</h1>
+  <p class="lead">{{ site.Params.description }}</p>
+</section>
+
+{{ $posts := where site.RegularPages "Section" "posts" }}
+{{ if $posts }}
+<ul class="post-list">
+  {{ range $posts }}
+  <li class="post-item">
+    <a class="post-link" href="{{ .RelPermalink }}">{{ .Title }}</a>
+    <div class="post-meta">
+      <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006 年 1 月 2 日" }}</time>
+    </div>
+    {{ with .Summary }}<p class="post-summary">{{ . | plainify | truncate 120 }}</p>{{ end }}
+  </li>
+  {{ end }}
+</ul>
+{{ else }}
+<p class="empty">还没有文章。删掉 <code>content/posts/</code> 里的示例，写你自己的。</p>
+{{ end }}
+{{ end }}
