@@ -1,6 +1,6 @@
 # 站点基础配置：改完这里，全站生效
 baseURL: "https://autleave.top/"       # 你的域名；结尾的斜杠不能少
-title: "我的博客"                     # ← 站点名
+title: "Autleave的博客"                     # ← 站点名
 defaultContentLanguage: "zh-cn"
 hasCJKLanguage: true
 enableRobotsTXT: true
@@ -10,7 +10,7 @@ pagination:
   pagerSize: 10
 
 params:
-  author: "你的名字"
+  author: "Autleave"
   description: "记录想法、笔记和生活。"
 
   # ===== 评论（Giscus，基于 GitHub Discussions，免费）=====
