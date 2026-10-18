@@ -30,6 +30,9 @@ menu:
     - name: "文章"
       url: "/posts/"
       weight: 10
+    - name: "日志"
+      url: "/logs/"
+      weight: 15
     - name: "关于"
       url: "/about/"
       weight: 20

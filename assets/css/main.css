@@ -216,6 +216,45 @@ a:hover { text-decoration: underline; }
 .notfound h1 { font-size: 3.5rem; margin: 0 0 0.5rem; letter-spacing: -0.03em; }
 .notfound p { color: var(--muted); margin: 0.4rem 0 1.2rem; }
 
+/* ---------- 日志列表 ---------- */
+.year-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin: 2.2rem 0 0.2rem;
+  text-transform: uppercase;
+}
+
+.log-list { list-style: none; margin: 0; padding: 0; }
+
+.log-item {
+  display: flex;
+  gap: 1rem;
+  align-items: baseline;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.log-date {
+  flex: 0 0 3.4rem;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.92rem;
+}
+
+.log-summary {
+  flex: 1;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 /* ---------- 自定义光标（初音青 · 像素风） ----------
    想关掉：删掉下面这三条规则即可。
    热点坐标：箭头尖端在 (1,1)，音符在 (2,2)，单位是像素。 */

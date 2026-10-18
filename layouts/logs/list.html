@@ -1,0 +1,27 @@
+{{ define "main" }}
+<header class="list-header">
+  <h1>{{ .Title }}</h1>
+  {{ with .Content }}<div class="list-intro">{{ . }}</div>{{ end }}
+</header>
+
+{{ $pages := .Pages.ByDate.Reverse }}
+{{ if $pages }}
+  {{ range $pages.GroupByDate "2006" }}
+  <h2 class="year-label">{{ .Key }} 年</h2>
+  <ul class="log-list">
+    {{ range .Pages }}
+    <li class="log-item">
+      <a class="log-date" href="{{ .RelPermalink }}">{{ .Date.Format "01-02" }}</a>
+      {{ with .Summary }}
+      <p class="log-summary">{{ . | plainify | truncate 90 }}</p>
+      {{ else }}
+      <p class="log-summary">—</p>
+      {{ end }}
+    </li>
+    {{ end }}
+  </ul>
+  {{ end }}
+{{ else }}
+<p class="empty">还没有日志。用 <code>new-log.ps1</code> 建今天这一篇。</p>
+{{ end }}
+{{ end }}
