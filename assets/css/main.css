@@ -216,6 +216,24 @@ a:hover { text-decoration: underline; }
 .notfound h1 { font-size: 3.5rem; margin: 0 0 0.5rem; letter-spacing: -0.03em; }
 .notfound p { color: var(--muted); margin: 0.4rem 0 1.2rem; }
 
+/* ---------- 自定义光标（初音青 · 像素风） ----------
+   想关掉：删掉下面这三条规则即可。
+   热点坐标：箭头尖端在 (1,1)，音符在 (2,2)，单位是像素。 */
+html {
+  cursor: url("/cursors/miku-arrow.png") 1 1, auto;
+}
+
+a,
+button {
+  cursor: url("/cursors/miku-note.png") 2 2, pointer;
+}
+
+input,
+textarea,
+select {
+  cursor: text;
+}
+
 /* ---------- 移动端 ---------- */
 @media (max-width: 600px) {
   body { font-size: 16px; }
