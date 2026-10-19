@@ -20,6 +20,13 @@ $ErrorActionPreference = 'Stop'
 
 # Decode native command output (python/git) as UTF-8, otherwise Chinese is garbled
 try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 } catch { }
+
+# Hugo 0.168 panics while resolving its cache dir if it cannot use %TEMP%.
+# Point TEMP at a project-local directory so the build never depends on it.
+$projectTemp = Join-Path $PSScriptRoot '.hugo-temp'
+if (-not (Test-Path $projectTemp)) { New-Item -ItemType Directory -Force -Path $projectTemp | Out-Null }
+$env:TEMP = $projectTemp
+$env:TMP = $projectTemp
 $Root = $PSScriptRoot
 $Hugo = Join-Path (Split-Path $Root -Parent) '.tools\hugo.exe'
 $RulesFile = Join-Path $Root 'sync\rules.json'
@@ -129,15 +136,78 @@ function Sync-Xishi {
     if (-not ((Test-Path $py) -and (Test-Path $src))) { return }
 
     $before = if (Test-Path $out) { (Get-FileHash $out -Algorithm SHA256).Hash } else { '' }
-    $rc = Invoke-Python @($py) -Quiet
+
+    $p = Get-PythonCommand
+    if (-not $p) {
+        Write-Host '[xishi] python not found, skipped' -ForegroundColor Yellow
+        return
+    }
+    Push-Location $Root
+    try {
+        $log = & $p.Exe @(@($p.Pre) + @($py)) 2>&1
+        $rc = $LASTEXITCODE
+    }
+    finally { Pop-Location }
+
     if ($rc -ne 0) {
-        Write-Host '[xishi] rebuild failed, ciphertext may be stale' -ForegroundColor Yellow
+        Write-Host '[xishi] rebuild failed, ciphertext may be stale:' -ForegroundColor Yellow
+        $log | ForEach-Object { Write-Host "        $_" -ForegroundColor DarkGray }
         return
     }
     $after = if (Test-Path $out) { (Get-FileHash $out -Algorithm SHA256).Hash } else { '' }
     if ($before -ne $after) { Write-Host '[xishi] secret.json updated' -ForegroundColor Cyan }
 }
 
+function Invoke-Doctor {
+    Write-Section 'Environment'
+    Write-Host ("  TEMP         = [" + $env:TEMP + "]  exists=" + (Test-Path $env:TEMP))
+    Write-Host ("  TMP          = [" + $env:TMP + "]  exists=" + (Test-Path $env:TMP))
+    Write-Host ("  LOCALAPPDATA = [" + $env:LOCALAPPDATA + "]  exists=" + (Test-Path $env:LOCALAPPDATA))
+    Write-Host ("  cwd          = " + (Get-Location))
+
+    $p = Get-PythonCommand
+    Write-Host ("  python       = " + $(if ($p) { $p.Exe } else { 'NOT FOUND' }))
+    Write-Host ("  hugo         = " + $Hugo + "  exists=" + (Test-Path $Hugo))
+
+    Write-Section 'Hugo smoke test'
+
+    function Test-Hugo($label, $extraArgs, $tempDir) {
+        $dest = Join-Path $Root '.doctor-tmp'
+        Remove-Item -Recurse -Force $dest -ErrorAction SilentlyContinue
+        $saved = @($env:TEMP, $env:TMP)
+        if ($tempDir) {
+            New-Item -ItemType Directory -Force -Path $tempDir | Out-Null
+            $env:TEMP = $tempDir
+            $env:TMP = $tempDir
+        }
+        try {
+            $args = @('--quiet', '--noBuildLock', '--destination', $dest) + $extraArgs
+            $out = & $Hugo @args 2>&1
+            $code = $LASTEXITCODE
+            $first = ($out | Select-Object -First 1)
+            Write-Host ("  {0,-26} exit={1}  {2}" -f $label, $code, $first)
+        }
+        finally {
+            $env:TEMP = $saved[0]
+            $env:TMP = $saved[1]
+            Remove-Item -Recurse -Force $dest -ErrorAction SilentlyContinue
+        }
+    }
+
+    Push-Location $Root
+    try {
+        Test-Hugo 'plain' @() $null
+        Test-Hugo 'with --cacheDir' @('--cacheDir', (Join-Path $Root '.doctor-cache')) $null
+        Test-Hugo 'with project TEMP' @() (Join-Path $Root '.doctor-temp')
+    }
+    finally {
+        Pop-Location
+        Remove-Item -Recurse -Force (Join-Path $Root '.doctor-cache'), (Join-Path $Root '.doctor-temp') -ErrorAction SilentlyContinue
+    }
+
+    Write-Host ''
+    Write-Host 'If hugo fails here but works when run by hand, the problem is the env.' -ForegroundColor Yellow
+}
 function Invoke-Publish {
     Sync-Xishi
     Push-Location $Root
@@ -293,6 +363,7 @@ function Show-Menu {
         Write-Host '  6. Local preview'
         Write-Host '  7. Rebuild xishi page'
         Write-Host '  8. Status'
+        Write-Host '  9. Doctor (env check)'
         Write-Host '  0. Exit'
         Write-Host ''
         $choice = Read-Host 'Choose'
@@ -306,6 +377,7 @@ function Show-Menu {
             '6' { Invoke-Serve }
             '7' { Invoke-Xishi; Pause-Any }
             '8' { Invoke-Status; Pause-Any }
+            '9' { Invoke-Doctor; Pause-Any }
             '0' { return }
             default { }
         }
@@ -324,6 +396,7 @@ switch ($Command.ToLower()) {
     'serve' { Invoke-Serve }
     'xishi' { Invoke-Xishi }
     'status' { Invoke-Status }
+    'doctor' { Invoke-Doctor }
     default {
         Write-Host "Unknown command: $Command" -ForegroundColor Red
         Write-Host 'Try: log | post | publish | sync | rules | serve | status'

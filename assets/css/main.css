@@ -367,6 +367,21 @@ a:hover { text-decoration: underline; }
 .xishi-note summary { cursor: pointer; }
 .xishi-note p { margin: 0.7rem 0 0; }
 
+/* ---------- 脚注 ---------- */
+.content .footnotes {
+  margin-top: 2.6rem;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+.content .footnotes hr { margin: 1.4rem 0 1rem; }
+.content .footnotes ol { padding-left: 1.4rem; }
+.content .footnotes li { margin: 0.4rem 0; }
+.content sup a {
+  text-decoration: none;
+  font-size: 0.78em;
+  padding: 0 0.1em;
+}
+
 /* ---------- 自定义光标（初音青 · 像素风） ----------
    想关掉：删掉下面这三条规则即可。
    热点坐标：箭头尖端在 (1,1)，音符在 (2,2)，单位是像素。 */

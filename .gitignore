@@ -5,3 +5,7 @@ resources/_gen/
 Thumbs.db
 __pycache__/
 xishi-secret.md
+.hugo-tmp/
+content/zz-tmpsecret/
+.hugo-temp/
+.hugo-tmp-env/

@@ -47,6 +47,7 @@ markup:
   goldmark:
     renderer:
       unsafe: true        # 允许正文里写原始 HTML
+      hardWraps: true     # 单个换行就换行，和 Obsidian 一致
   highlight:
     style: "github"
     noClasses: true

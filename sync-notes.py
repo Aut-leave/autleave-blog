@@ -23,6 +23,8 @@ import unicodedata
 from datetime import datetime
 from pathlib import Path
 
+from mdutils import convert_inline_footnotes
+
 # ---------------------------------------------------------------- 配置
 VAULT = Path(r"C:\Users\yr070\Desktop\Autleave-人生速通计划\计算机\CTF\obsidian")
 BLOG = Path(__file__).resolve().parent
@@ -300,6 +302,7 @@ def main():
             bits = raw.split("---", 2)
             if len(bits) == 3:
                 raw = bits[2]
+        raw = convert_inline_footnotes(raw)
         body = convert(raw, index, url_of, images, stats, used_images)
         generated[dest] = {"title": n["title"], "date": iso_date(n["path"]),
                            "weight": n["weight"], "body": body, "note": n}
