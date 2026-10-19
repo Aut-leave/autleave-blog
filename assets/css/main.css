@@ -286,6 +286,87 @@ a:hover { text-decoration: underline; }
   overflow: hidden;
 }
 
+/* ---------- 夕拾 ---------- */
+.xishi { padding: 1rem 0 3rem; }
+.xishi-head { padding: 1.8rem 0 1.2rem; }
+.xishi-head h1 { font-size: 1.7rem; margin: 0 0 0.3rem; letter-spacing: 0.02em; }
+.xishi-sub {
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.login-box {
+  max-width: 27rem;
+  padding: 1.4rem 1.3rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--code-bg);
+}
+.login-row { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.75rem; }
+.login-row label {
+  width: 5.4rem;
+  flex: none;
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.login-row input {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.9rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.login-row input:focus { outline: none; border-color: var(--accent); }
+
+.login-box button {
+  width: 100%;
+  margin-top: 0.15rem;
+  padding: 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 0.88rem;
+  letter-spacing: 0.35em;
+  text-indent: 0.35em;
+}
+.login-box button:hover { border-color: var(--accent); color: var(--accent); }
+
+.login-msg {
+  margin: 0;
+  padding: 0.9rem 0 0;
+  min-height: 2.4rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.76rem;
+  line-height: 1.55;
+  color: var(--muted);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.login-msg.error { color: #d9534f; }
+.login-msg.ok { color: #2f9e44; }
+
+.xishi-body { padding-top: 1.4rem; }
+
+.xishi-note {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.xishi-note summary { cursor: pointer; }
+.xishi-note p { margin: 0.7rem 0 0; }
+
 /* ---------- 自定义光标（初音青 · 像素风） ----------
    想关掉：删掉下面这三条规则即可。
    热点坐标：箭头尖端在 (1,1)，音符在 (2,2)，单位是像素。 */

@@ -204,6 +204,13 @@ function Invoke-Rules {
     Invoke-Python @($SyncPy)
 }
 
+function Invoke-Xishi {
+    $script = Join-Path $Root 'build-xishi.py'
+    if (-not (Test-Path $script)) { Write-Host 'build-xishi.py not found.' -ForegroundColor Red; return }
+    $rc = Invoke-Python @($script)
+    if ($rc -eq 0) { Write-Host 'Rebuilt data/xishi.json. Run publish to push.' -ForegroundColor Green }
+}
+
 function Invoke-Serve {
     $busy = Get-NetTCPConnection -LocalPort 1313 -ErrorAction SilentlyContinue
     if ($busy) {
@@ -256,7 +263,8 @@ function Show-Menu {
         Write-Host '  4. Sync Obsidian notes'
         Write-Host '  5. Edit publish rules'
         Write-Host '  6. Local preview'
-        Write-Host '  7. Status'
+        Write-Host '  7. Rebuild xishi page'
+        Write-Host '  8. Status'
         Write-Host '  0. Exit'
         Write-Host ''
         $choice = Read-Host 'Choose'
@@ -268,7 +276,8 @@ function Show-Menu {
             '4' { Invoke-Sync; Pause-Any }
             '5' { Invoke-Rules; Pause-Any }
             '6' { Invoke-Serve }
-            '7' { Invoke-Status; Pause-Any }
+            '7' { Invoke-Xishi; Pause-Any }
+            '8' { Invoke-Status; Pause-Any }
             '0' { return }
             default { }
         }
@@ -285,6 +294,7 @@ switch ($Command.ToLower()) {
     'allow' { Invoke-Rules }
     'rules' { Invoke-Rules }
     'serve' { Invoke-Serve }
+    'xishi' { Invoke-Xishi }
     'status' { Invoke-Status }
     default {
         Write-Host "Unknown command: $Command" -ForegroundColor Red

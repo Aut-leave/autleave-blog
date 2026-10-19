@@ -1,0 +1,137 @@
+{{ define "main" }}
+{{ $cipher := "" }}{{ with site.Data.xishi }}{{ $cipher = .cipher }}{{ end }}
+<div class="xishi">
+  {{ "<!-- 不要攻击我的博客！ -->" | safeHTML }}
+  <header class="xishi-head">
+    <h1>{{ .Title }}</h1>
+    <p class="xishi-sub">archive · restricted</p>
+  </header>
+
+  <form id="xishi-login" class="login-box" autocomplete="off">
+    <div class="login-row">
+      <label for="x-u">username</label>
+      <input id="x-u" name="u" type="text" spellcheck="false" autocomplete="off">
+    </div>
+    <div class="login-row">
+      <label for="x-p">password</label>
+      <input id="x-p" name="p" type="password" autocomplete="off">
+    </div>
+    <button type="submit">登 录</button>
+    <pre id="x-msg" class="login-msg"></pre>
+  </form>
+
+  <article id="x-body" class="content xishi-body" hidden></article>
+
+  <details class="xishi-note">
+    <summary>关于这个页面</summary>
+    <p>本站是静态网站。所以没有数据库。</p>
+  </details>
+</div>
+
+<script>
+(function () {
+  console.log('也不可以在控制台攻击我的博客！');
+  var CIPHER = {{ $cipher | jsonify | safeJS }};
+
+  var USERS = [
+    { id: 1, name: 'autleave', pass: 'zL9#mQ2v!xR4' },
+    { id: 2, name: 'guest',    pass: 'guest' }
+  ];
+
+  var KEY = new TextEncoder().encode('xishi-2026-sql-injection');
+
+  function keystream(n) {
+    var out = new Uint8Array(n), off = 0, counter = 0;
+    function next() {
+      if (off >= n) return out;
+      var buf = new Uint8Array(KEY.length + 4);
+      buf.set(KEY, 0);
+      new DataView(buf.buffer).setUint32(KEY.length, counter, false);
+      return crypto.subtle.digest('SHA-256', buf).then(function (h) {
+        var hb = new Uint8Array(h);
+        out.set(hb.subarray(0, Math.min(32, n - off)), off);
+        off += 32; counter++;
+        return next();
+      });
+    }
+    return next();
+  }
+
+  function decrypt(b64) {
+    var raw = Uint8Array.from(atob(b64), function (c) { return c.charCodeAt(0); });
+    return keystream(raw.length).then(function (ks) {
+      var out = new Uint8Array(raw.length);
+      for (var i = 0; i < raw.length; i++) out[i] = raw[i] ^ ks[i];
+      return new TextDecoder().decode(out);
+    });
+  }
+
+  // ---- 玩具 SQL 引擎：支持 AND / OR / -- 注释，够演示注入即可
+  function evalAtom(expr) {
+    var m = expr.match(/^(\d+)\s*=\s*(\d+)$/);
+    if (m) return m[1] === m[2];
+
+    m = expr.match(/^'(.*)'\s*=\s*'(.*)'$/);
+    if (m) return m[1] === m[2];
+
+    m = expr.match(/^([A-Za-z_]\w*)\s*=\s*'(.*)'$/);
+    if (!m) return false;
+
+    var col = m[1].toLowerCase(), val = m[2];
+    return USERS.some(function (u) { return String(u[col] === undefined ? '' : u[col]) === val; });
+  }
+
+  function evalCond(expr) {
+    var parts = expr.split(/\s+AND\s+/i);
+    for (var i = 0; i < parts.length; i++) {
+      if (!evalAtom(parts[i].trim())) return false;
+    }
+    return true;
+  }
+
+  function runQuery(user, pass) {
+    var sql = "SELECT * FROM users WHERE name = '" + user + "' AND pass = '" + pass + "'";
+    var cut = sql.indexOf('--');
+    var stripped = cut >= 0 ? sql.slice(0, cut) : sql;
+
+    var at = stripped.indexOf('WHERE ');
+    if (at < 0) return { ok: false, err: 'syntax error near WHERE' };
+
+    var conds = stripped.slice(at + 6);
+    var orParts = conds.split(/\s+OR\s+/i);
+    for (var i = 0; i < orParts.length; i++) {
+      if (evalCond(orParts[i].trim())) return { ok: true, sql: sql };
+    }
+    return { ok: false, err: 'access denied', sql: sql };
+  }
+
+  // ---- 界面
+  var form = document.getElementById('xishi-login');
+  var msg = document.getElementById('x-msg');
+  var body = document.getElementById('x-body');
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var u = document.getElementById('x-u').value;
+    var p = document.getElementById('x-p').value;
+    var r = runQuery(u, p);
+
+    if (!r.ok) {
+      msg.textContent = '登录失败，请检查账号密码。';
+      msg.className = 'login-msg error';
+      return;
+    }
+
+    msg.textContent = '登录成功，正在加载…';
+    msg.className = 'login-msg ok';
+
+    decrypt(CIPHER).then(function (html) {
+      body.innerHTML = html;
+      body.hidden = false;
+      form.hidden = true;
+      body.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+})();
+</script>
+{{ end }}

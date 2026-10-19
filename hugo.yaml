@@ -36,6 +36,9 @@ menu:
     - name: "笔记"
       url: "/notes/"
       weight: 18
+    - name: "夕拾"
+      url: "/xishi/"
+      weight: 25
     - name: "关于"
       url: "/about/"
       weight: 20
@@ -47,3 +50,6 @@ markup:
   highlight:
     style: "github"
     noClasses: true
+
+minify:
+  disableHTML: true   # 保留 HTML 注释（夕拾页面的提示）

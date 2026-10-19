@@ -4,3 +4,4 @@ resources/_gen/
 .DS_Store
 Thumbs.db
 __pycache__/
+xishi-secret.md
