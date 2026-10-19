@@ -33,6 +33,9 @@ menu:
     - name: "日志"
       url: "/logs/"
       weight: 15
+    - name: "笔记"
+      url: "/notes/"
+      weight: 18
     - name: "关于"
       url: "/about/"
       weight: 20

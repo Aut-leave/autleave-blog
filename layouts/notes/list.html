@@ -1,0 +1,35 @@
+{{ define "main" }}
+{{ partial "breadcrumb.html" . }}
+
+<header class="list-header">
+  <h1>{{ .Title }}</h1>
+  {{ with .Content }}<div class="list-intro">{{ . }}</div>{{ end }}
+</header>
+
+{{ if .Sections }}
+<h2 class="dir-label">目录</h2>
+<ul class="dir-list">
+  {{ range .Sections }}
+  <li class="dir-item">
+    <a class="dir-link" href="{{ .RelPermalink }}">{{ .Title }}</a>
+    <span class="dir-count">{{ len .RegularPagesRecursive }} 篇</span>
+  </li>
+  {{ end }}
+</ul>
+{{ end }}
+
+{{ if .RegularPages }}
+<h2 class="dir-label">笔记</h2>
+<ul class="dir-list">
+  {{ range .RegularPages }}
+  <li class="dir-item">
+    <a class="dir-link" href="{{ .RelPermalink }}">{{ .Title }}</a>
+  </li>
+  {{ end }}
+</ul>
+{{ end }}
+
+{{ if and (not .Sections) (not .RegularPages) }}
+<p class="empty">这个目录下还没有笔记。</p>
+{{ end }}
+{{ end }}

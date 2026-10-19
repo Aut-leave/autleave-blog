@@ -1,0 +1,10 @@
+{
+  "default": "private",
+  "include": [
+    "WEB/**",
+    "CRYPTO/**",
+    "教程/**",
+    "工具/**"
+  ],
+  "exclude": []
+}

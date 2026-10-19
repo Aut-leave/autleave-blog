@@ -1,0 +1,6 @@
+{{ $trail := .Ancestors.Reverse }}
+{{ if gt (len $trail) 1 }}
+<nav class="breadcrumb">
+  {{ range $i, $p := $trail }}{{ if gt $i 0 }}<a href="{{ $p.RelPermalink }}">{{ $p.Title }}</a><span class="sep">/</span>{{ end }}{{ end }}
+</nav>
+{{ end }}
