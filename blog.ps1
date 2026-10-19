@@ -48,18 +48,28 @@ function Open-File($Path) {
     if ($editor) { & $editor $Path } else { Start-Process notepad.exe -ArgumentList "`"$Path`"" }
 }
 
-function Invoke-Python {
-    param([string[]]$PyArgs)
-
+function Get-PythonCommand {
     $c = Get-Command python -ErrorAction SilentlyContinue
-    if ($c) { & $c.Source @PyArgs | Out-Host; return $LASTEXITCODE }
+    if ($c) { return @{ Exe = $c.Source; Pre = @() } }
     $c = Get-Command py -ErrorAction SilentlyContinue
-    if ($c) { & $c.Source -3 @PyArgs | Out-Host; return $LASTEXITCODE }
+    if ($c) { return @{ Exe = $c.Source; Pre = @('-3') } }
     $b = Join-Path $env:LOCALAPPDATA 'Programs\DSH Desktop\resources\office-runtime\primary-runtime\dependencies\python\python.exe'
-    if (Test-Path $b) { & $b @PyArgs | Out-Host; return $LASTEXITCODE }
+    if (Test-Path $b) { return @{ Exe = $b; Pre = @() } }
+    return $null
+}
 
-    Write-Host 'Python not found. Install Python or add it to PATH.' -ForegroundColor Red
-    return 1
+function Invoke-Python {
+    param([string[]]$PyArgs, [switch]$Quiet)
+
+    $p = Get-PythonCommand
+    if (-not $p) {
+        Write-Host 'Python not found. Install Python or add it to PATH.' -ForegroundColor Red
+        return 1
+    }
+
+    $all = @($p.Pre) + $PyArgs
+    if ($Quiet) { & $p.Exe @all | Out-Null } else { & $p.Exe @all | Out-Host }
+    return $LASTEXITCODE
 }
 
 function New-HugoFile($Type, $Slug) {
@@ -111,7 +121,25 @@ function Invoke-Post {
     Open-File $file
 }
 
+function Sync-Xishi {
+    # Re-encrypt the xishi secret if its markdown source changed.
+    $py = Join-Path $Root 'build-xishi.py'
+    $src = Join-Path $Root 'xishi-secret.md'
+    $out = Join-Path $Root 'static\xishi\secret.json'
+    if (-not ((Test-Path $py) -and (Test-Path $src))) { return }
+
+    $before = if (Test-Path $out) { (Get-FileHash $out -Algorithm SHA256).Hash } else { '' }
+    $rc = Invoke-Python @($py) -Quiet
+    if ($rc -ne 0) {
+        Write-Host '[xishi] rebuild failed, ciphertext may be stale' -ForegroundColor Yellow
+        return
+    }
+    $after = if (Test-Path $out) { (Get-FileHash $out -Algorithm SHA256).Hash } else { '' }
+    if ($before -ne $after) { Write-Host '[xishi] secret.json updated' -ForegroundColor Cyan }
+}
+
 function Invoke-Publish {
+    Sync-Xishi
     Push-Location $Root
     try {
         $raw = @(& git -c core.quotepath=false status --porcelain)
@@ -208,7 +236,7 @@ function Invoke-Xishi {
     $script = Join-Path $Root 'build-xishi.py'
     if (-not (Test-Path $script)) { Write-Host 'build-xishi.py not found.' -ForegroundColor Red; return }
     $rc = Invoke-Python @($script)
-    if ($rc -eq 0) { Write-Host 'Rebuilt data/xishi.json. Run publish to push.' -ForegroundColor Green }
+    if ($rc -eq 0) { Write-Host 'Rebuilt static/xishi/secret.json. Run publish to push.' -ForegroundColor Green }
 }
 
 function Invoke-Serve {
