@@ -21,7 +21,7 @@ from pathlib import Path
 
 BLOG = Path(__file__).resolve().parent
 SRC = BLOG / "xishi-secret.md"
-OUT = BLOG / "data" / "xishi.json"
+OUT = BLOG / "static" / "xishi" / "secret.json"
 
 KEY = b"xishi-2026-sql-injection"
 
@@ -137,7 +137,7 @@ def main():
     cipher = encrypt(body.encode("utf-8"))
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps({"cipher": cipher}, ensure_ascii=False), encoding="utf-8")
+    OUT.write_text(json.dumps({"c": cipher}, ensure_ascii=False), encoding="utf-8")
 
     print(f"源文件: {SRC}  ({len(md)} 字符)")
     print(f"渲染后: {len(body)} 字符 HTML")
